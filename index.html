@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Diabetes Clinical Risk Analytics</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg-gradient: linear-gradient(135deg, #f0f7ff 0%, #e0e7ff 100%);
+            --card-bg: rgba(255, 255, 255, 0.96);
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 25px 50px -12px rgba(37, 99, 235, 0.12);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+        }
+
+        .container {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border-radius: 24px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            width: 100%;
+            max-width: 880px;
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: linear-gradient(90deg, #2563eb, #3b82f6, #60a5fa);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #eff6ff;
+            color: #2563eb;
+            padding: 6px 16px;
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            border: 1px solid #dbeafe;
+        }
+
+        .header h2 {
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        .header p {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-top: 6px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 15px;
+            font-weight: 700;
+            color: #1e293b;
+            margin: 30px 0 16px 0;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #f1f5f9;
+        }
+
+        .section-header i {
+            color: var(--primary);
+            font-size: 16px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        label {
+            font-size: 12px;
+            font-weight: 700;
+            color: #475569;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 11px 14px;
+            border: 1.5px solid var(--border);
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-main);
+            background: #fff;
+            transition: all 0.2s ease;
+            outline: none;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 10px 20px -5px rgba(37, 99, 235, 0.4);
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 25px -5px rgba(37, 99, 235, 0.5);
+        }
+
+        #result-box {
+            margin-top: 30px;
+            display: none;
+            animation: slideUp 0.4s ease;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-card {
+            padding: 24px;
+            border-radius: 16px;
+            text-align: center;
+        }
+
+        .high-risk {
+            background: #fef2f2;
+            border: 1.5px solid #fecaca;
+            color: #991b1b;
+        }
+
+        .low-risk {
+            background: #f0fdf4;
+            border: 1.5px solid #bbf7d0;
+            color: #166534;
+        }
+
+        .result-title {
+            font-size: 18px;
+            font-weight: 800;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .progress-bar-bg {
+            background: rgba(0,0,0,0.06);
+            height: 10px;
+            border-radius: 10px;
+            margin: 15px 0 10px 0;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 1s ease-in-out;
+        }
+
+        .high-risk .progress-bar-fill { background: #dc2626; }
+        .low-risk .progress-bar-fill { background: #16a34a; }
+
+        @media (max-width: 768px) {
+            .form-grid { grid-template-columns: repeat(2, 1fr); }
+            .container { padding: 24px; }
+        }
+
+        @media (max-width: 520px) {
+            .form-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <div class="badge">
+            <i class="fa-solid fa-microchip"></i> XGBoost Trained Model (91.88% Accuracy)
+        </div>
+        <h2>Diabetes Risk Intelligence Panel</h2>
+        <p>Enter complete 28-point patient diagnostics for precise evaluation</p>
+    </div>
+
+    <form id="diabetesForm">
+        <!-- Section 1 -->
+        <div class="section-header">
+            <i class="fa-solid fa-user-doctor"></i> Demographics & Background
+        </div>
+        <div class="form-grid">
+            <div class="form-group"><label>Age</label><input type="number" id="age" value="45" required></div>
+            <div class="form-group"><label>Gender</label><select id="gender"><option>Female</option><option>Male</option></select></div>
+            <div class="form-group"><label>Ethnicity</label><select id="ethnicity"><option>Caucasian</option><option>African American</option><option>Asian</option><option>Hispanic</option><option>Other</option></select></div>
+            <div class="form-group"><label>Education</label><select id="education_level"><option>Highschool</option><option>Bachelor</option><option>Master</option><option>PhD</option><option>Other</option></select></div>
+            <div class="form-group"><label>Income Level</label><select id="income_level"><option>Low</option><option>Medium</option><option>High</option></select></div>
+            <div class="form-group"><label>Employment Status</label><select id="employment_status"><option>Employed</option><option>Unemployed</option><option>Retired</option><option>Student</option></select></div>
+        </div>
+
+        <!-- Section 2 -->
+        <div class="section-header">
+            <i class="fa-solid fa-heart-pulse"></i> Glucose & Vitals
+        </div>
+        <div class="form-grid">
+            <div class="form-group"><label>Fasting Glucose (mg/dL)</label><input type="number" id="glucose_fasting" value="100" required></div>
+            <div class="form-group"><label>Postprandial Glucose</label><input type="number" id="glucose_postprandial" value="140" required></div>
+            <div class="form-group"><label>HbA1c Level (%)</label><input type="number" step="0.1" id="hba1c" value="5.7" required></div>
+            <div class="form-group"><label>Insulin Level</label><input type="number" step="0.1" id="insulin_level" value="15.0" required></div>
+            <div class="form-group"><label>BMI</label><input type="number" step="0.1" id="bmi" value="25.0" required></div>
+            <div class="form-group"><label>Waist-to-Hip Ratio</label><input type="number" step="0.01" id="waist_to_hip_ratio" value="0.85" required></div>
+            <div class="form-group"><label>Systolic BP</label><input type="number" id="systolic_bp" value="120" required></div>
+            <div class="form-group"><label>Diastolic BP</label><input type="number" id="diastolic_bp" value="80" required></div>
+            <div class="form-group"><label>Heart Rate</label><input type="number" id="heart_rate" value="72" required></div>
+        </div>
+
+        <!-- Section 3 -->
+        <div class="section-header">
+            <i class="fa-solid fa-vial"></i> Lipid Profile
+        </div>
+        <div class="form-grid">
+            <div class="form-group"><label>Total Cholesterol</label><input type="number" id="cholesterol_total" value="200" required></div>
+            <div class="form-group"><label>HDL Cholesterol</label><input type="number" id="hdl_cholesterol" value="50" required></div>
+            <div class="form-group"><label>LDL Cholesterol</label><input type="number" id="ldl_cholesterol" value="100" required></div>
+            <div class="form-group"><label>Triglycerides</label><input type="number" id="triglycerides" value="150" required></div>
+        </div>
+
+        <!-- Section 4 -->
+        <div class="section-header">
+            <i class="fa-solid fa-notes-medical"></i> Lifestyle & Medical History
+        </div>
+        <div class="form-grid">
+            <div class="form-group"><label>Smoking Status</label><select id="smoking_status"><option>Never</option><option>Former</option><option>Current</option></select></div>
+            <div class="form-group"><label>Alcohol / Week</label><input type="number" id="alcohol_consumption_per_week" value="0" required></div>
+            <div class="form-group"><label>Physical Activity (min/wk)</label><input type="number" id="physical_activity_minutes_per_week" value="150" required></div>
+            <div class="form-group"><label>Diet Score (1-10)</label><input type="number" step="0.1" id="diet_score" value="5.0" required></div>
+            <div class="form-group"><label>Sleep Hours/Day</label><input type="number" step="0.5" id="sleep_hours_per_day" value="7.0" required></div>
+            <div class="form-group"><label>Screen Time Hours/Day</label><input type="number" step="0.5" id="screen_time_hours_per_day" value="4.0" required></div>
+            <div class="form-group"><label>Family Diabetes History</label><select id="family_history_diabetes"><option>No</option><option>Yes</option></select></div>
+            <div class="form-group"><label>Hypertension History</label><select id="hypertension_history"><option>No</option><option>Yes</option></select></div>
+            <div class="form-group"><label>Cardiovascular History</label><select id="cardiovascular_history"><option>No</option><option>Yes</option></select></div>
+        </div>
+
+        <button type="submit" class="btn-submit" id="submitBtn">
+            <i class="fa-solid fa-stethoscope"></i> Execute Risk Assessment
+        </button>
+    </form>
+
+    <div id="result-box">
+        <div id="result-card" class="result-card">
+            <div id="result-title" class="result-title"></div>
+            <div class="progress-bar-bg">
+                <div id="progress-bar" class="progress-bar-fill" style="width: 0%;"></div>
+            </div>
+            <div id="score-text" style="font-size: 13px; font-weight: 600;"></div>
+        </div>
+    </div>
+</div>
+<script>document.getElementById('diabetesForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Processing...`;
+
+    const getVal = id => parseFloat(document.getElementById(id).value) || 0;
+    const getStr = id => document.getElementById(id).value;
+
+    // Fixed payload to match model exact feature format
+    const formData = {
+        age: getVal('age'),
+        gender: getStr('gender'),
+        ethnicity: getStr('ethnicity'),
+        education_level: getStr('education_level'),
+        income_level: getStr('income_level'),
+        employment_status: getStr('employment_status'),
+        smoking_status: getStr('smoking_status'),
+        alcohol_consumption_per_week: getVal('alcohol_consumption_per_week'),
+        physical_activity_minutes_per_week: getVal('physical_activity_minutes_per_week'),
+        diet_score: getVal('diet_score'),
+        sleep_hours_per_day: getVal('sleep_hours_per_day'),
+        screen_time_hours_per_day: getVal('screen_time_hours_per_day'),
+        family_history_diabetes: getStr('family_history_diabetes'),
+        hypertension_history: getStr('hypertension_history'),
+        cardiovascular_history: getStr('cardiovascular_history'),
+        bmi: getVal('bmi'),
+        waist_to_hip_ratio: getVal('waist_to_hip_ratio'),
+        systolic_bp: getVal('systolic_bp'),
+        diastolic_bp: getVal('diastolic_bp'),
+        heart_rate: getVal('heart_rate'),
+        cholesterol_total: getVal('cholesterol_total'),
+        hdl_cholesterol: getVal('hdl_cholesterol'),
+        ldl_cholesterol: getVal('ldl_cholesterol'),
+        triglycerides: getVal('triglycerides'),
+        glucose_fasting: getVal('glucose_fasting'),
+        glucose_postprandial: getVal('glucose_postprandial'),
+        insulin_level: getVal('insulin_level'),
+        hba1c_level: getVal('hba1c')
+    };
+
+    const resultBox = document.getElementById('result-box');
+    const resultCard = document.getElementById('result-card');
+    const resultTitle = document.getElementById('result-title');
+    const progressBar = document.getElementById('progress-bar');
+    const scoreText = document.getElementById('score-text');
+
+    try {
+       const response = await fetch('https://diabetes-predictor-uf2h.onrender.com/predict', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(formData)
+});
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || `Server status: ${response.status}`);
+        }
+
+        resultBox.style.display = 'block';
+
+        if (data.is_high_risk) {
+            resultCard.className = 'result-card high-risk';
+            resultTitle.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> High Risk Detected`;
+        } else {
+            resultCard.className = 'result-card low-risk';
+            resultTitle.innerHTML = `<i class="fa-solid fa-circle-check"></i> Low Risk Detected`;
+        }
+
+        scoreText.innerHTML = `Model Calculated Risk Probability: <strong>${data.risk_score}%</strong>`;
+        
+        setTimeout(() => {
+            progressBar.style.width = `${Math.min(data.risk_score, 100)}%`;
+        }, 50);
+
+    } catch (error) {
+        resultBox.style.display = 'block';
+        resultCard.className = 'result-card high-risk';
+        resultTitle.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> Error Occurred`;
+        scoreText.innerHTML = `Details: ${error.message}`;
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<i class="fa-solid fa-stethoscope"></i> Execute Risk Assessment`;
+    }
+});</script>
+
+
+</body>
+</html>
